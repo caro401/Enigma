@@ -1,23 +1,30 @@
-# TODO implement error handling for plaintext
-# TODO make Scrambler automatically build its own table, so can tidy up encrypt_basic
+# TODO tidy up encrypt_basic now scrambler makes its own table
+# TODO Move bits of encryption function to the scramblers
+# TODO make reflector class, as a subclass of something a bit more abstract than a scrambler
+
+
 
 class Scrambler:
     def __init__(self, mapping, name="new"):
-        self.name = name  # give the thing some meaningful name for use later (also for file?)
-        self.m = mapping  # string specifying what each of letters maps to, in order
+        self.name = name  # give the thing some meaningful name for use later
+        self.m = mapping  # list of numbers specifying how to map from input to output characters
+        self.table = self.make_table()
 
     def make_table(self):
         # take in the mapping, return a dictionary representing all orientations of scrambler
         tab = {}
         for i in range(0, len(self.m)):
-            newalpha = self.m[i:] + self.m[:i]
+            newalpha = self.m[i:]
+            newalpha.extend(self.m[:i])
             tab[i] = newalpha
         return tab
 
 
 class Machine:
-    # make s2, s3, o2, o3 optional
-    def __init__(self, scrambler1, scrambler2, scrambler3, orientation1=0, orientation2=0, orientation3=0, alphabet="abcdefghijklmnopqrstuvwxyz"):
+    # TODO make s2, s3, o2, o3 optional? there must be a cleaner way to do this!
+    def __init__(self, scrambler1, scrambler2=[0]*26,
+                 scrambler3=[0]*26,
+                 orientation1=0, orientation2=0, orientation3=0, alphabet="abcdef"):
         self.s1 = scrambler1
         self.s2 = scrambler2
         self.s3 = scrambler3
@@ -45,44 +52,43 @@ class Machine:
             orientation2 = self.o2 + 1
             self.o2 = orientation2 % len(self.s2.m)
 
-    def encrypt_basic(self, number_of_scramblers=3):   #TODO error handling for number of scramblers
+    def encrypt_numbers(self):
         plaintext = input("Enter plaintext: ")
         ciphertext = ""
         table1 = Scrambler.make_table(self.s1)  # build the mapping for the scramblers
+        table2 = Scrambler.make_table(self.s2)  # build the mapping for the scramblers
+        table3 = Scrambler.make_table(self.s3)  # build the mapping for the scramblers
+
         for c in plaintext:
-            sub_alpha1 = table1[self.o1]
-            initial_index = self.alphabet.find(c)
-            char_after_first = sub_alpha1[initial_index]
-
-            if number_of_scramblers == 1:
-                ciphertext += char_after_first
+            # check that c is valid
+            if c not in self.alphabet:
+                print("invalid character", c)
+                break
+            else:
+                map1 = table1[self.o1]  # select the correct mapping for current orientation of s1
+                map2 = table2[self.o2]
+                map3 = table3[self.o3]
+                n0 = self.alphabet.find(c)  # first find unmodified index N of plaintext character
+                n1 = (map1[n0] + n0) % len(self.alphabet)  # pass through first scrambler, modify N according to mapping
+                # print("after first scrambler:", n1, self.alphabet[n1])
+                n2 = (map2[n1] + n1) % len(self.alphabet)
+                # print("after second scrambler:", n2, self.alphabet[n2])
+                n3 = (map3[n2] + n2) % len(self.alphabet)
+                # print("after third scrambler:", n3, self.alphabet[n3])
+                ciphertext += self.alphabet[n3]
                 self.increment_scramblers()
-
-            else:  # ie more than one scrambler
-                table2 = Scrambler.make_table(self.s2)
-                sub_alpha2 = table2[self.o2]
-                index_after_first = self.alphabet.find(char_after_first)  # find index of result
-                char_after_second = sub_alpha2[index_after_first]  # pass this new character through second scrambler
-                if number_of_scramblers == 2:
-                    ciphertext += char_after_second
-                    self.increment_scramblers()
-
-                else:  # currently can't do anything different for more than 3
-                    table3 = Scrambler.make_table(self.s3)
-                    sub_alpha3 = table3[self.o3]
-                    index_after_second = self.alphabet.find(char_after_second)  # find index of result
-                    char_after_third = sub_alpha3[index_after_second]  # pass new character through third scrambler
-                    ciphertext += char_after_third
-                    self.increment_scramblers()
         return ciphertext
 
 
-
 a = "bcdefghijklmnopqrstuvwxyza"
-y = Scrambler(a, "basicTest")
-z = Scrambler(a, "basicTest2")
-w = Scrambler(a, "basicTest3")
+b = [3, 1, 3, 1, 2, 2]
+blank=[0]*6
+y = Scrambler(b, "basicTest")
+print(y.table)
+z = Scrambler(blank, "basicTest2")
+w = Scrambler(blank, "basicTest3")
 x = Machine(y, z, w)
 m = Machine(y, z, w)
-print(x.encrypt_basic())
-print(x.o1, x.o2, x.o3)
+#print(x.encrypt_basic(2))
+print(x.encrypt_numbers())
+#print()
