@@ -1,15 +1,16 @@
+# TODO check i got the mappings of the real rotors right! zzzzz
 # TODO (eventually) be able to set up plugboard from user input?
-# TODO (eventually) implement rings
-# TODO (eventually) make instances of Scrambler, Reflector matching real wirings
 
-alphabet = "abcdef"
+# alphabet = "abcdef"
+alphabet = "abcdefghijklmnopqrstuvwxyz"
 
 
 class Scrambler():
-    def __init__(self, mapping, orientation=0):
+    def __init__(self, mapping, orientation=0, step_orientation=[0]):
         self.orientation = orientation  # integer representing orientation of scrambler
         self.m = mapping  # list of numbers specifying how to map from input to output characters
         self.inverse_m = self.calculate_inverse_m()  # list representing base mapping of scrambler in reverse direction
+        self.step_orientation = step_orientation  # tuple of orientation AFTER has caused next rotor to step on
 
     def calculate_inverse_m(self):  # from the original mapping, work out what the mapping is in other direction
         reversed_inverse_m = []
@@ -32,9 +33,18 @@ class Scrambler():
         return new_int
 
 
-class Reflector():
+class PairMap:
     def __init__(self, mapping):
         self.m = mapping
+
+    def encrypt_char(self, integer):  # passes a single character, represented as integer, through the reflector
+        new_int = (integer + self.m[integer]) % len(alphabet)
+        return new_int
+
+
+class Reflector(PairMap):
+    def __init__(self, mapping):
+        PairMap.__init__(self, mapping)
         self.check = self.check_mapping()
 
     def check_mapping(self):
@@ -46,21 +56,21 @@ class Reflector():
                 check = False
         return check
 
-    def encrypt_char(self, integer):  # passes a single character, represented as integer, through the reflector
-        new_int = (integer + self.m[integer]) % len(alphabet)
-        return new_int
 
-
-class Plugboard():  # note directionality is irrelevant for plugboard!
+class Plugboard(PairMap):  # note directionality is irrelevant for plugboard!
     def __init__(self, mapping):
-        self.m = mapping
+        PairMap.__init__(self, mapping)
+        self.check = self.check_mapping()
 
-    def encrypt_char(self, integer):  # passes a single character, represented as integer, through the plugboard
-        # this is identical to the one in Reflector... don't really want 2 copies of same function :(
-        new_int = (integer + self.m[integer]) % len(alphabet)
-        return new_int
-
-    # TODO make a function to check the map provided is a valid plugboard ie swaps pairs or leaves char unchanged
+    def check_mapping(self):
+        # check that it is a valid plugboard, ie swaps pairs of chars or leaves char unchanged
+        check = True
+        for i in range(len(self.m)):
+            if self.m[i] != 0:
+                maps_to = (i + self.m[i]) % len(self.m)
+                if (maps_to + self.m[maps_to]) % len(self.m) != i:
+                    check = False
+        return check
 
 
 class Machine:
@@ -81,14 +91,10 @@ class Machine:
 
         # step scrambler 2 on for each full rotation of the first, and scrambler 3 for each full rotation of the second
         # this will always happen (atm) together - 3 cannot increment without 2 incrementing too
-        if self.s2.orientation == length - 1 and self.s1.orientation == 0:
+        if self.s1.orientation in self.s1.step_orientation:
             self.s2.orientation = (self.s2.orientation + 1) % length
-            self.s3.orientation = (self.s3.orientation + 1) % length
-            # print("incrementing all")  # for debugging
-        # steps the second scrambler on for each full rotation of the first
-        elif self.s1.orientation == 0:
-            self.s2.orientation = (self.s2.orientation + 1) % length
-            # print("incrementing 1 and 2")  # for debugging
+            if self.s2.orientation in self.s2.step_orientation:
+                self.s3.orientation = (self.s3.orientation + 1) % length
 
     def encrypt(self):
         # concerned this is really redundant and messy, esp if most of the bits of Machine don't do anything
@@ -97,7 +103,7 @@ class Machine:
         plaintext = input("Enter plaintext: ")
         ciphertext = ""
         for c in plaintext:
-            # check that c is valid
+            # check that c is validz
             if c not in alphabet:
                 print("invalid character", c)
                 break
@@ -115,17 +121,16 @@ class Machine:
                 n7 = self.s1.encrypt_char_backward(n6)  # through first scrambler in reverse
                 n8 = self.plug.encrypt_char(n7)  # plugboard backward
                 ciphertext += alphabet[n8]  # map from integer back to letter using alphabet, add to ciphertext str
-                print(initial_no, n0, n1, n2, n3, n4, n5, n6, n7, n8)  # so i can see what it's doing!
+                # print(initial_no, n0, n1, n2, n3, n4, n5, n6, n7, n8)  # so i can see what it's doing!
         return ciphertext
 
 
+si = Scrambler([5, 9, 10, 2, 7, 1, 23, 9, 13, 16, 3, 8, 2, 9, 10, 18, 7, 3, 0, 22, 6, 13, 5, 20, 4, 10], 0, [18])
+sii = Scrambler([0, 8, 1, 7, 14, 3, 11, 13, 15, 18, 1, 22, 10, 6, 24, 13, 0, 15, 7, 20, 21, 3, 8, 24, 16, 5], 0, [6])
+siii = Scrambler([1, 2, 2, 4, 5, 6, 22, 8, 9, 10, 13, 10, 13, 0, 10, 15, 18, 5, 14, 7, 16, 17, 22, 21, 18, 15], 0, [23])
+ra = Reflector([4, 8, 10, 22, 22, 6, 18, 16, 13, 18, 12, 20, 16, 4, 2, 5, 24, 22, 1, 25, 21, 13, 14, 10, 8, 4])
+p = Plugboard([0] * 26)
 
-s = [3, 1, 3, 1, 2, 2]
-blank = [0] * 6
-a = Scrambler(s)
-p = Plugboard([3, 0, 0] * 2)
-r = Reflector([3] * 6)
-z = Scrambler(blank)
-w = Scrambler(blank)
-x = Machine(a, z, w, r, p)
+print(p.check, ra.check)
+x = Machine(si, sii, siii, ra, p)
 print(x.encrypt())
