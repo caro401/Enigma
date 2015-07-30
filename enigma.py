@@ -1,3 +1,4 @@
+# TODO URGENT tidy up Machine.encrypt() like Carl said
 # TODO check i got the mappings of the real rotors right! zzzzz
 # TODO (eventually) be able to set up plugboard from user input?
 
@@ -96,13 +97,13 @@ class Machine:
             if self.s2.orientation in self.s2.step_orientation:
                 self.s3.orientation = (self.s3.orientation + 1) % length
 
-    def encrypt(self):
+    def encrypt(self, plaintext):
         # concerned this is really redundant and messy, esp if most of the bits of Machine don't do anything
         # also not very general, but fixing this depends on how deal with Machine's parameters?
 
-        plaintext = input("Enter plaintext: ")
+        self.plaintext = plaintext
         ciphertext = ""
-        for c in plaintext:
+        for c in self.plaintext:
             # check that c is validz
             if c not in alphabet:
                 print("invalid character", c)
@@ -130,7 +131,4 @@ sii = Scrambler([0, 8, 1, 7, 14, 3, 11, 13, 15, 18, 1, 22, 10, 6, 24, 13, 0, 15,
 siii = Scrambler([1, 2, 2, 4, 5, 6, 22, 8, 9, 10, 13, 10, 13, 0, 10, 15, 18, 5, 14, 7, 16, 17, 22, 21, 18, 15], 0, [23])
 ra = Reflector([4, 8, 10, 22, 22, 6, 18, 16, 13, 18, 12, 20, 16, 4, 2, 5, 24, 22, 1, 25, 21, 13, 14, 10, 8, 4])
 p = Plugboard([0] * 26)
-
-print(p.check, ra.check)
-x = Machine(si, sii, siii, ra, p)
-print(x.encrypt())
+default_machine = Machine(si, Scrambler([0]*26), Scrambler([0]*26), ra, p)
