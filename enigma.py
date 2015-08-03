@@ -136,24 +136,34 @@ class Machine:
                 ciphertext += alphabet[num]  # map from integer back to letter using alphabet, add to ciphertext str
         return ciphertext
 
+
+# saved examples of real wartime scramblers, reflectors
+
 si = Scrambler([4, 9, 10, 2, 7, 1, 23, 9, 13, 16, 3, 8, 2, 9, 10, 18, 7, 3, 0, 22, 6, 13, 5, 20, 4, 10], [18])
 sii = Scrambler([0, 8, 1, 7, 14, 3, 11, 13, 15, 18, 1, 22, 10, 6, 24, 13, 0, 15, 7, 20, 21, 3, 9, 24, 16, 5], [6])
 siii = Scrambler([1, 2, 3, 4, 5, 6, 22, 8, 9, 10, 13, 10, 13, 0, 10, 15, 18, 5, 14, 7, 16, 17, 24, 21, 18, 15], [23])
-sx = Scrambler([0]*26)
-main_scrambler_list = [si, sii, sx]
+siv = Scrambler([4, 17, 12, 18, 11, 20, 3, 19, 16, 7, 10, 23, 5, 20, 9, 22, 23, 14, 1, 13, 16, 8, 6, 15, 24, 2], [10])
+sv = Scrambler([21, 24, 25, 14, 2, 3, 13, 17, 12, 6, 8, 18, 1, 20, 23, 8, 10, 5, 20, 16, 22, 19, 9, 7, 4, 11], [0])
+svi = Scrambler([9, 14, 4, 18, 10, 15, 6, 24, 16, 7, 17, 19, 1, 20, 11, 2, 13, 19, 8, 25, 3, 16, 12, 5,21, 23], [0, 14])
+svii = Scrambler([13, 24, 7, 4, 2, 12, 22, 16, 4, 15, 8, 11, 15, 1, 6, 16, 10, 17, 3, 18, 21, 9, 14, 19, 5, 20], [0, 14])
+sviii = Scrambler([5, 9, 14, 4, 15, 6, 17, 7, 20, 18, 25, 7, 3, 16, 11, 2, 10, 21, 12, 3, 19, 13, 24, 1, 8, 22], [0, 14])
 
-# test_list = [Scrambler([3,1,3,1,2,2], [1,4]), Scrambler([3,1,3,1,2,2], [3]), Scrambler([0]*6)]
 
-
-rx = Reflector([13] * 26)
 ra = Reflector([4, 8, 10, 22, 22, 6, 18, 16, 13, 18, 12, 20, 16, 4, 2, 5, 24, 22, 1, 25, 21, 13, 14, 10, 8, 4])
-p = Plugboard([0] * 26)
-default_machine = Machine(main_scrambler_list,  rx, p)
-#test = Scrambler([3,1,3,1,2,2])
-print(si.display_mapping())
-print(si.inverse_m)
-# test_machine = Machine(test_list, Reflector([3]*6))
-# print(test_machine.encrypt("aaaaaaaaaaaaaaaaaaaa"))
-# print(default_machine.encrypt("dfghklmnbbgjftuklj"))
+rb = Reflector([24, 16, 18, 4, 12, 13, 5, 22, 7, 14, 3, 21, 2, 23, 24, 19, 14, 10, 13, 6, 8, 1, 25, 12, 2, 20])
+rc = Reflector([5, 20, 13, 6, 4, 21, 8, 17, 22, 20, 7, 14, 11, 9, 18, 13, 3, 19, 2, 23, 24, 6, 17, 15, 9, 12])
+rbt = Reflector([4, 12, 8, 13, 22, 15, 18, 15, 1, 25, 18, 3, 3, 14, 23, 23, 13, 6, 7, 2, 11, 24, 11, 20, 8, 19])
+rct = Reflector([17, 2, 12, 24, 5, 8, 13, 3, 13, 21, 23, 1, 25, 18, 14, 7, 9, 9, 5, 13, 4, 13, 19, 21, 22, 17])
 
-print(default_machine.encrypt(alphabet))
+sx = Scrambler([0]*26)
+rx = Reflector([0] * 26)
+px = Plugboard([0] * 26)
+
+
+# stuff needed for enigmaGUIbasic
+main_scrambler_list = [si, sii, siii]
+default_machine = Machine(main_scrambler_list,  ra, px)
+
+
+#debugging extras
+print(rct.display_mapping(), rb.check_mapping())
