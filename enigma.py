@@ -122,23 +122,17 @@ class Machine:
                 break
             else:
                 self.increment_scramblers()
-                print("orientations:", self.s[0].orientation, self.s[1].orientation, self.s[2].orientation)
                 initial_no = alphabet.find(c)  # map the letter to its equivalent integer in the alphabet
                 num = self.plug.encrypt_char(initial_no)  # plugboard forward
-                print("1", alphabet[num])
                 num = self.loop_scramblers_f(num)  # scrambler(s) forward
-                print("scram", alphabet[num])
                 num = self.ref.encrypt_char(num)  # reflector
-                print("refl", alphabet[num])
                 num = self.loops_scramblers_b(num)  # scramblers backward
-                print("s", alphabet[num])
                 num = self.plug.encrypt_char(num)  # plugboard backward
                 ciphertext += alphabet[num]  # map from integer back to letter using alphabet, add to ciphertext str
         return ciphertext
 
 
 # saved examples of real wartime scramblers, reflectors
-
 si = Scrambler([4, 9, 10, 2, 7, 1, 23, 9, 13, 16, 3, 8, 2, 9, 10, 18, 7, 3, 0, 22, 6, 13, 5, 20, 4, 10], [18])
 sii = Scrambler([0, 8, 1, 7, 14, 3, 11, 13, 15, 18, 1, 22, 10, 6, 24, 13, 0, 15, 7, 20, 21, 3, 9, 24, 16, 5], [6])
 siii = Scrambler([1, 2, 3, 4, 5, 6, 22, 8, 9, 10, 13, 10, 13, 0, 10, 15, 18, 5, 14, 7, 16, 17, 24, 21, 18, 15], [23])
@@ -166,4 +160,3 @@ default_machine = Machine(main_scrambler_list,  ra, px)
 
 
 #debugging extras
-print(rct.display_mapping(), rb.check_mapping())
