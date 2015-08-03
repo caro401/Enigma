@@ -11,7 +11,7 @@ label2 = tk.Label(root1, text="ciphertext:")
 ciphertext = "Your ciphertext goes here!"
 ciphertext_label_text = tk.StringVar()
 ciphertext_label_text.set(ciphertext)
-ciphertext_label = tk.Label(root1, textvariable=ciphertext_label_text)
+ciphertext_label = tk.Entry(root1, textvariable=ciphertext_label_text)
 
 
 def showentry(event):
