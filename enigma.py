@@ -2,7 +2,7 @@
 # TODO add the other real scramblers and reflectors
 # TODO (eventually) be able to set up plugboard from user input?
 
-#alphabet = "abcdef"
+# alphabet = "abcdef"
 alphabet = "abcdefghijklmnopqrstuvwxyz"
 
 
@@ -21,7 +21,7 @@ class Scrambler():
             # work out inverse by taking this number from len(alphabet)
             new_map = len(alphabet) - result  # the thing you need to add to result to get i
             # put this new number in inverse_m at the index you get by applying m to char
-            inverse_m[(result+i)%len(alphabet)] = new_map
+            inverse_m[(result+i) % len(alphabet)] = new_map
         return inverse_m
 
     def encrypt_char_forward(self, integer):  # passes a single character, represented as integer, through the scrambler
@@ -125,12 +125,30 @@ class Machine:
                 initial_no = alphabet.find(c)  # map the letter to its equivalent integer in the alphabet
                 num = self.plug.encrypt_char(initial_no)  # plugboard forward
                 num = self.loop_scramblers_f(num)  # scrambler(s) forward
-                num = self.ref.encrypt_char(num)  # reflector
-                num = self.loops_scramblers_b(num)  # scramblers backward
-                num = self.plug.encrypt_char(num)  # plugboard backward
-                ciphertext += alphabet[num]  # map from integer back to letter using alphabet, add to ciphertext str
+                if self.ref.m != [0]*len(alphabet):
+                    num = self.ref.encrypt_char(num)  # reflector
+                    num = self.loops_scramblers_b(num)  # scramblers backward
+                    num = self.plug.encrypt_char(num)  # plugboard backward
+                    ciphertext += alphabet[num]  # map from integer back to letter using alphabet, add to ciphertext str
+                else:
+                    ciphertext += alphabet[num]  # map from integer back to letter using alphabet, add to ciphertext str
         return ciphertext
 
+
+def build_plugboard(map_string):
+    length = len(alphabet)
+    new_plug_map = [0] * length
+    if len(map_string) != 0:
+        pairs = map_string.split()
+        for pair in pairs:
+            index1 = alphabet.find(pair[0])
+            index2 = alphabet.find(pair[2])
+            new_plug_map[index1] = (index2 - index1) % length
+            new_plug_map[index2] = (index1 - index2) % length
+        new_plug = Plugboard(new_plug_map)
+    else:
+        new_plug = Plugboard(new_plug_map)
+    return new_plug
 
 # saved examples of real wartime scramblers, reflectors
 si = Scrambler([4, 9, 10, 2, 7, 1, 23, 9, 13, 16, 3, 8, 2, 9, 10, 18, 7, 3, 0, 22, 6, 13, 5, 20, 4, 10], [18])
@@ -138,10 +156,11 @@ sii = Scrambler([0, 8, 1, 7, 14, 3, 11, 13, 15, 18, 1, 22, 10, 6, 24, 13, 0, 15,
 siii = Scrambler([1, 2, 3, 4, 5, 6, 22, 8, 9, 10, 13, 10, 13, 0, 10, 15, 18, 5, 14, 7, 16, 17, 24, 21, 18, 15], [23])
 siv = Scrambler([4, 17, 12, 18, 11, 20, 3, 19, 16, 7, 10, 23, 5, 20, 9, 22, 23, 14, 1, 13, 16, 8, 6, 15, 24, 2], [10])
 sv = Scrambler([21, 24, 25, 14, 2, 3, 13, 17, 12, 6, 8, 18, 1, 20, 23, 8, 10, 5, 20, 16, 22, 19, 9, 7, 4, 11], [0])
-svi = Scrambler([9, 14, 4, 18, 10, 15, 6, 24, 16, 7, 17, 19, 1, 20, 11, 2, 13, 19, 8, 25, 3, 16, 12, 5,21, 23], [0, 14])
-svii = Scrambler([13, 24, 7, 4, 2, 12, 22, 16, 4, 15, 8, 11, 15, 1, 6, 16, 10, 17, 3, 18, 21, 9, 14, 19, 5, 20], [0, 14])
-sviii = Scrambler([5, 9, 14, 4, 15, 6, 17, 7, 20, 18, 25, 7, 3, 16, 11, 2, 10, 21, 12, 3, 19, 13, 24, 1, 8, 22], [0, 14])
-
+svi = Scrambler([9, 14, 4, 18, 10, 15, 6, 24, 16, 7, 17, 19, 1, 20, 11, 2, 13, 19, 8, 25, 3, 16, 12, 5, 21, 23], [0, 14])
+svii = Scrambler([13, 24, 7, 4, 2, 12, 22, 16, 4, 15, 8, 11, 15, 1, 6, 16, 10, 17, 3, 18, 21, 9, 14, 19, 5, 20],
+                 [0, 14])
+sviii = Scrambler([5, 9, 14, 4, 15, 6, 17, 7, 20, 18, 25, 7, 3, 16, 11, 2, 10, 21, 12, 3, 19, 13, 24, 1, 8, 22],
+                  [0, 14])
 
 ra = Reflector([4, 8, 10, 22, 22, 6, 18, 16, 13, 18, 12, 20, 16, 4, 2, 5, 24, 22, 1, 25, 21, 13, 14, 10, 8, 4])
 rb = Reflector([24, 16, 18, 4, 12, 13, 5, 22, 7, 14, 3, 21, 2, 23, 24, 19, 14, 10, 13, 6, 8, 1, 25, 12, 2, 20])
@@ -149,14 +168,25 @@ rc = Reflector([5, 20, 13, 6, 4, 21, 8, 17, 22, 20, 7, 14, 11, 9, 18, 13, 3, 19,
 rbt = Reflector([4, 12, 8, 13, 22, 15, 18, 15, 1, 25, 18, 3, 3, 14, 23, 23, 13, 6, 7, 2, 11, 24, 11, 20, 8, 19])
 rct = Reflector([17, 2, 12, 24, 5, 8, 13, 3, 13, 21, 23, 1, 25, 18, 14, 7, 9, 9, 5, 13, 4, 13, 19, 21, 22, 17])
 
-sx = Scrambler([0]*26)
+sx = Scrambler([0] * 26)
 rx = Reflector([0] * 26)
 px = Plugboard([0] * 26)
+
+possible_scramblers = [si, sii, siii, siv, sv, svi, svii, sviii, sx]
+possible_reflectors = [ra, rb, rc, rbt, rct, rx]
 
 
 # stuff needed for enigmaGUIbasic
 main_scrambler_list = [si, sii, siii]
 default_machine = Machine(main_scrambler_list,  ra, px)
 
+# debugging extras
+# short_test1 = Scrambler([3, 1, 3, 1, 2, 2])
+# short_test2 = Scrambler([3, 1, 3, 1, 2, 2])
 
-#debugging extras
+# new_machine = Machine([short_test1], Reflector([3]*6))
+# null_machine = Machine([short_test2], Reflector([0]*6))
+# print(si.display_mapping(), ra.display_mapping())
+# print(new_machine.encrypt("aaaaa"))
+# print(null_machine.encrypt("aaaaa"))
+# print(build_plugboard('a:b k:z'))
