@@ -1,12 +1,3 @@
-<<<<<<< HEAD
-# from blue laptop
-=======
-# TODO can generalise Machine.encrypt() further?
-# TODO add the other real scramblers and reflectors
-# TODO (eventually) be able to set up plugboard from user input?
-
-# alphabet = "abcdef"
->>>>>>> 3348a19860b255a55dc4f22840e1797474715690
 alphabet = "abcdefghijklmnopqrstuvwxyz"
 
 
@@ -15,43 +6,23 @@ class Scrambler():
         self.orientation = orientation  # integer representing orientation of scrambler
         self.m = mapping  # list of numbers specifying how to map from input to output characters
         self.inverse_m = self.calculate_inverse_m()  # list representing base mapping of scrambler in reverse direction
-<<<<<<< HEAD
         self.step_orientation = step_orientation  # tuple of orientations AFTER has caused next rotor to step on
-=======
-        self.step_orientation = step_orientation  # tuple of orientation AFTER has caused next rotor to step on
->>>>>>> 3348a19860b255a55dc4f22840e1797474715690
 
     def calculate_inverse_m(self):  # from the original mapping, work out what the mapping is in other direction
         inverse_m = [0]*len(alphabet)
         for i in range(len(alphabet)):
-<<<<<<< HEAD
             result = self.m[i]
             new_map = len(alphabet) - result
-=======
-            # find mapping number in m
-            result = self.m[i]  # the thing you get applying mapping to i
-            # work out inverse by taking this number from len(alphabet)
-            new_map = len(alphabet) - result  # the thing you need to add to result to get i
-            # put this new number in inverse_m at the index you get by applying m to char
->>>>>>> 3348a19860b255a55dc4f22840e1797474715690
             inverse_m[(result+i) % len(alphabet)] = new_map
         return inverse_m
 
     def encrypt_char_forward(self, integer):  # passes a single character, represented as integer, through the scrambler
         current_wiring_f = self.m[self.orientation:] + self.m[:self.orientation]
-<<<<<<< HEAD
-=======
-        # print("wiring forwards: ", current_wiring_f)  # for debugging
->>>>>>> 3348a19860b255a55dc4f22840e1797474715690
         new_int = (integer + current_wiring_f[integer]) % len(alphabet)
         return new_int
 
     def encrypt_char_backward(self, integer):  # passes single char represented as integer through s in reverse
         current_wiring_b = self.inverse_m[self.orientation:] + self.inverse_m[:self.orientation]
-<<<<<<< HEAD
-=======
-        # print("wiring backwards: ", current_wiring_b)  # for debugging
->>>>>>> 3348a19860b255a55dc4f22840e1797474715690
         new_int = (integer + current_wiring_b[integer]) % len(alphabet)
         return new_int
 
@@ -100,10 +71,6 @@ class Plugboard(PairMap):  # note directionality is irrelevant for plugboard!
         self.check = self.check_mapping()
 
     def check_mapping(self):
-<<<<<<< HEAD
-=======
-        # check that it is a valid plugboard, ie swaps pairs of chars or leaves char unchanged
->>>>>>> 3348a19860b255a55dc4f22840e1797474715690
         check = True
         for i in range(len(self.m)):
             if self.m[i] != 0:
@@ -138,7 +105,6 @@ class Machine:
     def encrypt(self, plaintext):
         ciphertext = ""
         for c in plaintext:
-<<<<<<< HEAD
             self.increment_scramblers()
             initial_no = alphabet.find(c)  # map the letter to its equivalent integer in the alphabet
             num = self.plug.encrypt_char(initial_no)  # plugboard forward
@@ -153,54 +119,14 @@ class Machine:
         return ciphertext
 
 
-=======
-            # check that c is valid
-            if c not in alphabet:
-                print("invalid character", c)
-                break
-            else:
-                self.increment_scramblers()
-                initial_no = alphabet.find(c)  # map the letter to its equivalent integer in the alphabet
-                num = self.plug.encrypt_char(initial_no)  # plugboard forward
-                num = self.loop_scramblers_f(num)  # scrambler(s) forward
-                if self.ref.m != [0]*len(alphabet):
-                    num = self.ref.encrypt_char(num)  # reflector
-                    num = self.loops_scramblers_b(num)  # scramblers backward
-                    num = self.plug.encrypt_char(num)  # plugboard backward
-                    ciphertext += alphabet[num]  # map from integer back to letter using alphabet, add to ciphertext str
-                else:
-                    ciphertext += alphabet[num]  # map from integer back to letter using alphabet, add to ciphertext str
-        return ciphertext
-
-
-def build_plugboard(map_string):
-    length = len(alphabet)
-    new_plug_map = [0] * length
-    if len(map_string) != 0:
-        pairs = map_string.split()
-        for pair in pairs:
-            index1 = alphabet.find(pair[0])
-            index2 = alphabet.find(pair[2])
-            new_plug_map[index1] = (index2 - index1) % length
-            new_plug_map[index2] = (index1 - index2) % length
-        new_plug = Plugboard(new_plug_map)
-    else:
-        new_plug = Plugboard(new_plug_map)
-    return new_plug
-
->>>>>>> 3348a19860b255a55dc4f22840e1797474715690
 # saved examples of real wartime scramblers, reflectors
 si = Scrambler([4, 9, 10, 2, 7, 1, 23, 9, 13, 16, 3, 8, 2, 9, 10, 18, 7, 3, 0, 22, 6, 13, 5, 20, 4, 10], [18])
 sii = Scrambler([0, 8, 1, 7, 14, 3, 11, 13, 15, 18, 1, 22, 10, 6, 24, 13, 0, 15, 7, 20, 21, 3, 9, 24, 16, 5], [6])
 siii = Scrambler([1, 2, 3, 4, 5, 6, 22, 8, 9, 10, 13, 10, 13, 0, 10, 15, 18, 5, 14, 7, 16, 17, 24, 21, 18, 15], [23])
 siv = Scrambler([4, 17, 12, 18, 11, 20, 3, 19, 16, 7, 10, 23, 5, 20, 9, 22, 23, 14, 1, 13, 16, 8, 6, 15, 24, 2], [10])
 sv = Scrambler([21, 24, 25, 14, 2, 3, 13, 17, 12, 6, 8, 18, 1, 20, 23, 8, 10, 5, 20, 16, 22, 19, 9, 7, 4, 11], [0])
-<<<<<<< HEAD
 svi = Scrambler([9, 14, 4, 18, 10, 15, 6, 24, 16, 7, 17, 19, 1, 20, 11, 2, 13, 19, 8, 25, 3, 16, 12, 5, 21, 23],
                 [0, 14])
-=======
-svi = Scrambler([9, 14, 4, 18, 10, 15, 6, 24, 16, 7, 17, 19, 1, 20, 11, 2, 13, 19, 8, 25, 3, 16, 12, 5, 21, 23], [0, 14])
->>>>>>> 3348a19860b255a55dc4f22840e1797474715690
 svii = Scrambler([13, 24, 7, 4, 2, 12, 22, 16, 4, 15, 8, 11, 15, 1, 6, 16, 10, 17, 3, 18, 21, 9, 14, 19, 5, 20],
                  [0, 14])
 sviii = Scrambler([5, 9, 14, 4, 15, 6, 17, 7, 20, 18, 25, 7, 3, 16, 11, 2, 10, 21, 12, 3, 19, 13, 24, 1, 8, 22],
@@ -222,19 +148,4 @@ possible_reflectors = [ra, rb, rc, rbt, rct, rx]
 
 # stuff needed for enigmaGUIbasic
 main_scrambler_list = [si, sii, siii]
-<<<<<<< HEAD
 default_machine = Machine(main_scrambler_list,  ra, px)
-=======
-default_machine = Machine(main_scrambler_list,  ra, px)
-
-# debugging extras
-# short_test1 = Scrambler([3, 1, 3, 1, 2, 2])
-# short_test2 = Scrambler([3, 1, 3, 1, 2, 2])
-
-# new_machine = Machine([short_test1], Reflector([3]*6))
-# null_machine = Machine([short_test2], Reflector([0]*6))
-# print(si.display_mapping(), ra.display_mapping())
-# print(new_machine.encrypt("aaaaa"))
-# print(null_machine.encrypt("aaaaa"))
-# print(build_plugboard('a:b k:z'))
->>>>>>> 3348a19860b255a55dc4f22840e1797474715690
