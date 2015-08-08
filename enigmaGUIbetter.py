@@ -37,9 +37,9 @@ select_rotor_3.current(8)
 
 
 # dropdown to select which reflector to use
-available_reflectors = ["A", "B", "C", "B thin", "C thin"]
+available_reflectors = ["A", "B", "C", "B thin", "C thin", "null", "test"]
 pick4 = ttk.Labelframe(settings_frame, text='Select reflector')
-select_reflector = ttk.Combobox(pick4, values=available_reflectors, state='readonly', width=5)
+select_reflector = ttk.Combobox(pick4, values=available_reflectors, state='readonly', width=2)
 select_reflector.current(0)
 
 
@@ -148,7 +148,8 @@ set2.grid(in_=set_pos, column=1, row=1, padx=5, pady=5)
 set3.grid(in_=set_pos, column=2, row=1, padx=5, pady=5)
 
 pick4.grid(in_=settings_frame, column=0, row=2, padx=5, pady=5)
-select_reflector.grid(in_=pick4, padx=5, pady=5)
+select_reflector.grid(in_=pick4, padx=5, pady=5, sticky="ew")
+pick4.grid_columnconfigure(0, weight=1)
 
 plugboard_entry_label.grid(in_=settings_frame, row=3, padx=5, pady=5)
 plugboard_entry.grid(in_=plugboard_entry_label, padx=5, pady=5)
