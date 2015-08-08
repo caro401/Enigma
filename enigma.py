@@ -140,10 +140,11 @@ rct = Reflector([17, 2, 12, 24, 5, 8, 13, 3, 13, 21, 23, 1, 25, 18, 14, 7, 9, 9,
 
 sx = Scrambler([0] * 26)
 rx = Reflector([0] * 26)
+rt = Reflector([13] * 26)
 px = Plugboard([0] * 26)
 
 possible_scramblers = [si, sii, siii, siv, sv, svi, svii, sviii, sx]
-possible_reflectors = [ra, rb, rc, rbt, rct, rx]
+possible_reflectors = [ra, rb, rc, rbt, rct, rx, rt]
 
 
 # stuff needed for enigmaGUIbasic
