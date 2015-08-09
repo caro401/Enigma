@@ -84,9 +84,18 @@ def build_plugboard(map_string):
 
 # bind encrypt button to function displaying ciphertext
 def encrypt():
+    # tidy entry of plaintext
     plain = plaintext_entry.get(1.0, END).strip()
-    if not plain.isalpha():
+    plain = plain.lower()
+
+    # check can process plain, or display error message
+    total = 0
+    for c in plain:
+        if c.isalpha() or c == " ":
+            total += 1
+    if total != len(plain):
         tkinter.messagebox.showerror("oh no!", "Invalid plaintext")
+
 
     # put the right scramblers and reflector in the machine
     scram_list = [

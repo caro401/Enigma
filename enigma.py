@@ -107,20 +107,25 @@ class Machine:
         for c in plaintext:
             self.increment_scramblers()
             initial_no = alphabet.find(c)  # map the letter to its equivalent integer in the alphabet
-            num = self.plug.encrypt_char(initial_no)  # plugboard forward
-            num = self.loop_scramblers_f(num)  # scrambler(s) forward
-            if self.ref.m != [0]*len(alphabet):
-                num = self.ref.encrypt_char(num)  # reflector
-                num = self.loops_scramblers_b(num)  # scramblers backward
-                num = self.plug.encrypt_char(num)  # plugboard backward
-                ciphertext += alphabet[num]  # map from integer back to letter using alphabet, add to ciphertext str
+            if c == " ":
+                ciphertext += " "
+            elif initial_no == -1:
+                ciphertext += "*"
             else:
-                ciphertext += alphabet[num]  # map from integer back to letter using alphabet, add to ciphertext str
+                num = self.plug.encrypt_char(initial_no)  # plugboard forward
+                num = self.loop_scramblers_f(num)  # scrambler(s) forward
+                if self.ref.m != [0]*len(alphabet):
+                    num = self.ref.encrypt_char(num)  # reflector
+                    num = self.loops_scramblers_b(num)  # scramblers backward
+                    num = self.plug.encrypt_char(num)  # plugboard backward
+                    ciphertext += alphabet[num]  # map from integer back to letter using alphabet, add to ciphertext str
+                else:
+                    ciphertext += alphabet[num]  # map from integer back to letter using alphabet, add to ciphertext str
         return ciphertext
 
 
 # saved examples of real wartime scramblers, reflectors
-si = Scrambler([4, 9, 10, 2, 7, 1, 23, 9, 13, 16, 3, 8, 2, 9, 10, 18, 7, 3, 0, 22, 6, 13, 5, 20, 4, 10], [18])
+si = Scrambler([4, 9, 10, 2, 7, 1, 23, 9, 13, 16, 3, 8, 2, 9, 10, 18, 7, 3, 0, 22, 6, 13, 5, 20, 4, 10], [17])
 sii = Scrambler([0, 8, 1, 7, 14, 3, 11, 13, 15, 18, 1, 22, 10, 6, 24, 13, 0, 15, 7, 20, 21, 3, 9, 24, 16, 5], [6])
 siii = Scrambler([1, 2, 3, 4, 5, 6, 22, 8, 9, 10, 13, 10, 13, 0, 10, 15, 18, 5, 14, 7, 16, 17, 24, 21, 18, 15], [23])
 siv = Scrambler([4, 17, 12, 18, 11, 20, 3, 19, 16, 7, 10, 23, 5, 20, 9, 22, 23, 14, 1, 13, 16, 8, 6, 15, 24, 2], [10])
