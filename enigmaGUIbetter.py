@@ -1,5 +1,3 @@
-# TODO error handling!!!
-
 from tkinter import *
 from tkinter import ttk
 import tkinter.messagebox
@@ -96,7 +94,6 @@ def encrypt():
     if total != len(plain):
         tkinter.messagebox.showerror("oh no!", "Invalid plaintext")
 
-
     # put the right scramblers and reflector in the machine
     scram_list = [
         enigma.possible_scramblers[select_rotor_1.current()],
@@ -166,5 +163,5 @@ plugboard_entry.grid(in_=plugboard_entry_label, padx=5, pady=5)
 
 close_button.grid(column=1, row=3, padx=10, pady=10)
 
-
+# Do the thing!
 root1.mainloop()

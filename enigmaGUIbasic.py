@@ -1,5 +1,8 @@
 import tkinter as tk
 import enigma
+"""
+This is a very simple GUI I used for learning how to do GUI programming.
+"""
 
 root1 = tk.Tk()  # root window
 root1.title("Basic Encryptor!")
@@ -30,5 +33,5 @@ label2.pack()
 ciphertext_label.pack()
 close_button.pack(side=tk.BOTTOM)
 
-
+# Do the thing!
 root1.mainloop()

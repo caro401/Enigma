@@ -2,31 +2,44 @@ alphabet = "abcdefghijklmnopqrstuvwxyz"
 
 
 class Scrambler():
+    """
+    Class to represent a rotor in the machine.
+    """
     def __init__(self, mapping, step_orientation=[0], orientation=0):
-        self.orientation = orientation  # integer representing orientation of scrambler
-        self.m = mapping  # list of numbers specifying how to map from input to output characters
+        self.orientation = orientation  # integer representing current orientation of scrambler
+        self.m = mapping  # list of numbers specifying how to map from input to output characters (by addition)
         self.inverse_m = self.calculate_inverse_m()  # list representing base mapping of scrambler in reverse direction
         self.step_orientation = step_orientation  # tuple of orientations AFTER has caused next rotor to step on
 
-    def calculate_inverse_m(self):  # from the original mapping, work out what the mapping is in other direction
-        inverse_m = [0]*len(alphabet)
+    def calculate_inverse_m(self):
+        """
+        From the original mapping, work out what the mapping is when you pass a character through in the other direction
+        ie on the way back from the reflector
+        """
+        inverse_m = [0]*len(alphabet)  # initialise it at a list of zeros
         for i in range(len(alphabet)):
             result = self.m[i]
             new_map = len(alphabet) - result
             inverse_m[(result+i) % len(alphabet)] = new_map
         return inverse_m
 
-    def encrypt_char_forward(self, integer):  # passes a single character, represented as integer, through the scrambler
+    def encrypt_char_forward(self, integer):
+        """
+        Calculate what happens when you pass a single character, represented as integer, through the scrambler
+        """
         current_wiring_f = self.m[self.orientation:] + self.m[:self.orientation]
         new_int = (integer + current_wiring_f[integer]) % len(alphabet)
         return new_int
 
-    def encrypt_char_backward(self, integer):  # passes single char represented as integer through s in reverse
+    def encrypt_char_backward(self, integer):
+        """
+        Calculate what happens when you pass a single character, represented as integer, through the scrambler backwards
+        """
         current_wiring_b = self.inverse_m[self.orientation:] + self.inverse_m[:self.orientation]
         new_int = (integer + current_wiring_b[integer]) % len(alphabet)
         return new_int
 
-    def display_mapping(self):  # prints out the alphabetic mapping
+    def display_mapping(self):  # prints out the alphabetic mapping (for debugging)
         cipher = ""
         for i in range(len(alphabet)):
             cipher += alphabet[self.encrypt_char_forward(i)]
@@ -35,14 +48,20 @@ class Scrambler():
 
 
 class PairMap:
+    """
+    Superclass for things that swap pairs of characters (the reflector and the plugboard)
+    """
     def __init__(self, mapping):
         self.m = mapping
 
-    def encrypt_char(self, integer):  # passes a single character, represented as integer, through the reflector
+    def encrypt_char(self, integer):
+        """
+        Calculate what happens when you pass a single character, represented as integer, through the reflector/plugboard
+        """
         new_int = (integer + self.m[integer]) % len(alphabet)
         return new_int
 
-    def display_mapping(self):  # prints out the alphabetic mapping
+    def display_mapping(self):  # prints out the alphabetic mapping (for debugging)
         cipher = ""
         for i in range(len(alphabet)):
             cipher += alphabet[self.encrypt_char(i)]
@@ -56,7 +75,9 @@ class Reflector(PairMap):
         self.check = self.check_mapping()
 
     def check_mapping(self):
-        # check that it is a valid reflector, ie swaps pairs of characters
+        """
+        Check that the mapping is a valid reflector, ie swaps pairs of characters
+        """
         check = True
         for i in range(len(self.m)):
             maps_to = (i + self.m[i]) % len(self.m)
@@ -71,6 +92,9 @@ class Plugboard(PairMap):  # note directionality is irrelevant for plugboard!
         self.check = self.check_mapping()
 
     def check_mapping(self):
+        """
+        Check that the plugboard is valid, ie swaps pairs of characters
+        """
         check = True
         for i in range(len(self.m)):
             if self.m[i] != 0:
@@ -81,28 +105,45 @@ class Plugboard(PairMap):  # note directionality is irrelevant for plugboard!
 
 
 class Machine:
+    """
+    Class to represent a whole enigma machine, including what scramblers it contains, reflector and plugboard settings
+    """
     def __init__(self, scrambler_list, reflector=Reflector([0]*26), plugboard=Plugboard([0]*26)):
         self.s = scrambler_list
         self.ref = reflector
         self.plug = plugboard
 
     def increment_scramblers(self):
+        """
+        Step on the scramblers. Always step the first, step the others if pushed on by the previous
+        """
         for i in range(len(self.s)):
             self.s[i].orientation = (self.s[i].orientation + 1) % len(alphabet)  # increment orientation of s[i]
             if self.s[i].orientation not in self.s[i].step_orientation:  # unless this means moving past push point
-                break  # break out of loop
+                break
 
-    def loop_scramblers_f(self, num):  # pass a character forward through however many scramblers there are
+    def loop_scramblers_f(self, num):
+        """
+        Pass a character forward through however many scramblers there are in the machine
+        """
         for i in range(len(self.s)):
             num = self.s[i].encrypt_char_forward(num)
         return num
 
-    def loops_scramblers_b(self, num):  # pass a character back through however many scramblers there are
+    def loops_scramblers_b(self, num):
+        """
+        Pass a character back through however many scramblers there are in the machine
+        """
         for i in range(len(self.s)):
             num = self.s[len(self.s)-1 - i].encrypt_char_backward(num)
         return num
 
     def encrypt(self, plaintext):
+        """
+        Do encryption!
+        :param plaintext: plaintext message, String
+        :return:  ciphertext message, String
+        """
         ciphertext = ""
         for c in plaintext:
             self.increment_scramblers()
@@ -114,7 +155,7 @@ class Machine:
             else:
                 num = self.plug.encrypt_char(initial_no)  # plugboard forward
                 num = self.loop_scramblers_f(num)  # scrambler(s) forward
-                if self.ref.m != [0]*len(alphabet):
+                if self.ref.m != [0]*len(alphabet):  # not null
                     num = self.ref.encrypt_char(num)  # reflector
                     num = self.loops_scramblers_b(num)  # scramblers backward
                     num = self.plug.encrypt_char(num)  # plugboard backward
@@ -143,7 +184,7 @@ rc = Reflector([5, 20, 13, 6, 4, 21, 8, 17, 22, 20, 7, 14, 11, 9, 18, 13, 3, 19,
 rbt = Reflector([4, 12, 8, 13, 22, 15, 18, 15, 1, 25, 18, 3, 3, 14, 23, 23, 13, 6, 7, 2, 11, 24, 11, 20, 8, 19])
 rct = Reflector([17, 2, 12, 24, 5, 8, 13, 3, 13, 21, 23, 1, 25, 18, 14, 7, 9, 9, 5, 13, 4, 13, 19, 21, 22, 17])
 
-sx = Scrambler([0] * 26)
+sx = Scrambler([0] * 26)  # some useful blank/minimal ones for testing
 rx = Reflector([0] * 26)
 rt = Reflector([13] * 26)
 px = Plugboard([0] * 26)
